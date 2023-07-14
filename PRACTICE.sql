@@ -1,29 +1,46 @@
-CREATE TABLE Testing (
-territory_key INT PRIMARY KEY, 
-region VARCHAR(10), 
-subregion VARCHAR (10),
-segment VARCHAR (5),
-territory VARCHAR(20) NULL)
+/*Query 1
+Write a query that returns unique regions in territory table.
+*/
+SELECT DISTINCT Region FROM Territory
 
-CREATE TABLE Revenue (
-Revenue_key INT PRIMARY KEY,
-territory_key INT,
-calender_key DATE,
-revenue NUMERIC (7,2) )
+/*Query 2
+Write a query that returns all the subregions in UKIR region.*/
+SELECT subregion  FROM  territory WHERE region = 'UKIR'
 
-INSERT INTO dbo.Revenue (Revenue_key, territory_key, calender_key, revenue)
-VALUES
-    (1, 1, '2019-01-01', 20000.00),
-    (2, 1, '2019-02-01', 22000.00),
-    (3, 1, '2019-03-01', 23500.00),
-    (4, 1, '2019-04-01', 25000.00),
-    (5, 2, '2019-01-01', 6000.00),
-    (6, 2, '2019-02-01', 6500.00),
-    (7, 2, '2019-03-01', 6200.00),
-    (8, 2, '2019-04-01', 6600.00),
-    (9, 3, '2019-01-01', 18500.00),
-    (10, 3, '2019-02-01', 19000.00),
-    (11, 3, '2019-03-01', 20000.00),
-    (12, 3, '2019-04-01', 25000.00),
-    (13, 1, '2018-01-01', 19000.00),
-    (14, 1, '2018-02-01', 19500.00);
+/*Query 3
+Write a query that shows how many territories exist per region.
+Order the result based on the highest number of territories.*/
+SELECT region, COUNT (territory) AS 'No of Territory'
+FROM territory
+GROUP BY region
+ORDER BY 'No of Territory' DESC
+
+/*Query 4
+Write a query that returns the total revenue for the current year.*/
+SELECT SUM(revenue) AS total_revenue
+FROM revenue
+WHERE calendar_key LIKE '%2019%'
+
+/*Query 5
+Write a query that returns the total revenue per region.
+Only take current year year into account and show the region with the highest revenue at the top.*/
+SELECT Region, SUM(revenue) AS total_revenue
+FROM revenue r
+JOIN Territory t ON r.territory_key = t.territory_key
+JOIN Calendar c ON r.calendar_key = c.calendar_key
+WHERE c.calendar_key LIKE '%2019%'
+GROUP BY t.region
+ORDER BY total_revenue DESC
+
+/*Query 6
+Write a query that returns the region, subregion, segment, territory and total revenue.
+Only take current year into account. Filter the result to only show ENT segment.
+Only return total revenues greater than 85,000.*/ 
+SELECT t.region, t.subregion, t.segment, t.Territory, SUM(r.revenue) AS total_revenue
+FROM Revenue r
+JOIN Territory t ON r.territory_key = t.territory_key
+JOIN Calendar c ON r.calendar_key = c.calendar_key
+WHERE c.calendar_key LIKE '%2019%'
+AND t.segment = 'ENT'
+GROUP BY t.region, t.subregion, t.segment, t.Territory
+HAVING SUM(r.revenue) > 85000
